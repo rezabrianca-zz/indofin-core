@@ -138,6 +138,7 @@ def get_last_profit(company):
     SELECT * FROM "fundamental"."{company_code}"
     '''.format(company_code=company)
     print('Processing for {0}'.format(company))
+    sendMessage('Processing for {0}'.format(company))
     try:
         conn = pg_connect()
         last_profit = pd.read_sql(last_profit_q, conn).tail(1).reset_index()
