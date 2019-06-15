@@ -273,7 +273,7 @@ if __name__ == "__main__":
     print('Start with {0} parallel'.format(n_process))
     sendMessage('Start with {0} parallel processing'.format(n_process))
     start = time()
-    for result in mp.imap(get_last_profit, company_code_list):
+    for result in mp.map(get_last_profit, company_code_list):
         if result is not None:
             print(result)
     duration = time() - start
