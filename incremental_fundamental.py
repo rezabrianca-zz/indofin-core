@@ -238,8 +238,8 @@ def get_last_profit(company):
         print('Table not exist for {0}'.format(company))
         print('Error Type:', e.__class__.__name__)
         new_data = pd.DataFrame({'company_code': [], 'quarter':[], 'year':[], 'net_profit_report':[], 'net_profit_quarter':[]})
-        # new_data.to_sql('{0}'.format(company), conn, schema='fundamental', if_exists='append', index=False)
-        print(new_data)
+        new_data.to_sql('{0}'.format(company), conn, schema='fundamental', if_exists='append', index=False)
+        # print(new_data)
         pass
 
     except Exception as e:
