@@ -262,6 +262,7 @@ if __name__ == "__main__":
 
     mp = Pool(n_process)
     print('Start with {0} parallel'.format(n_process))
+    sendMessage('Start with {0} parallel processing'.format(n_process))
     start = time()
     for result in mp.imap(get_last_profit, company_code_list):
         print(result)
