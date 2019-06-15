@@ -137,6 +137,7 @@ def get_last_profit(company):
     last_profit_q = '''
     SELECT * FROM "fundamental"."{company_code}"
     '''.format(company_code=company)
+    print('Processing for {0}'.format(company))
     try:
         conn = pg_connect()
         last_profit = pd.read_sql(last_profit_q, conn).tail(1).reset_index()
@@ -206,7 +207,7 @@ def get_last_profit(company):
                 new_data.loc[0, 'net_profit_quarter'] = None
                 new_data.to_sql('{0}'.format(company), conn, schema='fundamental', if_exists='append', index=False)
                 new_data.to_sql('all_fundamental'.format(company), conn, schema='fundamental', if_exists='append', index=False)
-                print(new_data)
+                # print(new_data)
 
             except Exception as e:
                 print('File not found for {0}'.format(company))
@@ -228,19 +229,27 @@ def get_last_profit(company):
                 print('Error Message:', e)
                 pass
 
-    except ProgrammingError as e:
+    except AttributeError as e:
+        print('Error Type:', e.__class__.__name__)
+        # print('Error Message:', e)
+        pass
+
+    except s.exc.ProgrammingError as e:
         print('Table not exist for {0}'.format(company))
         print('Error Type:', e.__class__.__name__)
-        print('Error Message:', e)
         new_data = pd.DataFrame({'company_code': [], 'quarter':[], 'year':[], 'net_profit_report':[], 'net_profit_quarter':[]})
-        new_data.to_sql('{0}'.format(company), conn, schema='fundamental', if_exists='append', index=False)
-        # print(new_data)
+        # new_data.to_sql('{0}'.format(company), conn, schema='fundamental', if_exists='append', index=False)
+        print(new_data)
         pass
 
     except Exception as e:
         # print('File not found for {0}'.format(company))
+        print('Error Class:', e.__class__)
         print('Error Type:', e.__class__.__name__)
         print('Error Message:', e)
+        sendMessage('Error Class: {0}'.format(e.__class__))
+        sendMessage('Error Type: {0}'.format(e.__class__.__name__))
+        sendMessage('Error Message: {0}'.format(e))
         pass
 
 
@@ -257,15 +266,16 @@ if __name__ == "__main__":
     '''
 
     active_company = pd.read_sql(active_company_q, conn)
-    company_code_list = list(active_company.company_code)
-    n_process = int(ceil(len(company_code_list) / 100))
+    company_code_list = list(set(active_company.company_code))
+    n_process = 5 #int(ceil(len(company_code_list) / 100))
 
     mp = Pool(n_process)
     print('Start with {0} parallel'.format(n_process))
     sendMessage('Start with {0} parallel processing'.format(n_process))
     start = time()
     for result in mp.imap(get_last_profit, company_code_list):
-        print(result)
+        if result is not None:
+            print(result)
     duration = time() - start
     print('Finished incremental fundamental load at {0} with duration {1:.2f} seconds'.format(print_date, duration))
     sendMessage('Finished incremental fundamental load at {0} with duration {1:.2f} seconds'.format(print_date, duration))
